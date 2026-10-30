@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hand Song</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✋</text></svg>" />
+  </head>
+  <body>
+    <video id="cam" playsinline muted></video>
+    <canvas id="stage"></canvas>
+
+    <div class="hud">
+      <header id="toolbar" class="toolbar" hidden>
+        <span class="brand">Hand Song</span>
+        <label>Song <select id="song"></select></label>
+        <label>Style <select id="style"></select></label>
+        <div id="toolbarMore" class="toolbar-more">
+          <label>Mode <select id="mode"></select></label>
+          <label>Key <select id="key"></select></label>
+          <label>Scale <select id="scale"></select></label>
+          <label class="melody">Lead <select id="lead"></select></label>
+          <label class="chords">Chord sound <select id="chordSound"></select></label>
+          <label class="chords">Chord style <select id="chordStyle"></select></label>
+          <label>Beat <select id="pattern"></select></label>
+          <label>BPM <input id="bpm" type="range" min="50" max="160" value="96" /> <output id="bpmOut">96</output></label>
+        </div>
+        <button id="record" type="button">● Record</button>
+        <a id="download" class="download" hidden>Download take</a>
+        <button id="more" type="button" class="more" aria-expanded="false" aria-controls="toolbarMore">More ▾</button>
+      </header>
+
+      <section id="songPanel" class="song" aria-label="Song" hidden>
+        <div class="song-head">
+          <p class="song-title"><b id="songTitle"></b> <span id="songArtist"></span></p>
+          <span id="songSection" class="song-section"></span>
+          <button id="songRestart" type="button" class="song-restart">Restart</button>
+          <button id="songSkip" type="button">Skip</button>
+        </div>
+        <div class="song-main">
+          <div id="songNow" class="song-now" aria-live="polite">
+            <span id="songFinger" class="song-finger" aria-hidden="true"></span>
+            <div>
+              <div id="songChord" class="song-chord"></div>
+              <div id="songHint" class="song-hint"></div>
+            </div>
+          </div>
+          <ol id="songNext" class="song-next" aria-label="Up next"></ol>
+        </div>
+        <div class="song-bar"><div id="songBar"></div></div>
+        <div class="song-words">
+          <p id="songLyric" class="song-lyric"></p>
+          <p id="songLyricNext" class="song-lyric-next"></p>
+          <p id="songNote" class="song-note">Chords only. Sing along from memory.</p>
+          <p id="songShift" class="song-note" hidden></p>
+        </div>
+      </section>
+    </div>
+
+    <main id="intro" class="intro">
+      <div class="card">
+        <h1>Hand Song</h1>
+        <p class="lede">Make music with your hands, using your webcam.</p>
+        <ul class="how">
+          <li><b class="chords">Left hand: chord signs.</b> Every chord has its own hand shape: ☝️ is C, ✌️ is G, 🤘 is Am and so on. The full chart is on screen, at the bottom left.</li>
+          <li><b class="melody">Right hand: strum.</b> Sweep your hand down or up across the strings on the right. Sweep faster to strum harder.</li>
+          <li><b>Fist:</b> Close your left hand to mute the strings.</li>
+          <li><b>Songs:</b> Pick a song in the toolbar, make each chord's sign and strum along while you sing.</li>
+          <li><b>Styles:</b> Pick a style to set the sound, beat and tempo in one go.</li>
+          <li>To play chords and a melody with finger counts or pinches instead, switch <b>Mode</b> to <b>Count fingers</b> or <b>Pinch &amp; slide</b> in the toolbar.</li>
+        </ul>
+        <button id="start" type="button" class="start">Start camera &amp; sound</button>
+        <p id="status" class="status" role="status"></p>
+        <p class="keys">Keyboard: <kbd>Space</kbd> beat on/off · <kbd>R</kbd> record</p>
+      </div>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

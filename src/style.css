@@ -1,0 +1,575 @@
+:root {
+  --bg: #0b0d12;
+  --panel: rgba(16, 19, 27, 0.78);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #eef1f6;
+  --muted: #9aa3b2;
+  --melody: #3ee0d0;
+  --chords: #ffb347;
+  --record: #ff5470;
+  color-scheme: dark;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#cam {
+  display: none;
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+.melody {
+  color: var(--melody);
+}
+.chords {
+  color: var(--chords);
+}
+
+/* Toolbar and song panel stack at the top; clicks between them reach nothing anyway. */
+.hud {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  pointer-events: none;
+}
+.hud > * {
+  pointer-events: auto;
+}
+
+.toolbar {
+  align-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  font-size: 13px;
+}
+.toolbar[hidden] {
+  display: none;
+}
+/* Secondary controls: inline on wide screens, behind "More" on phones. */
+.toolbar-more {
+  display: contents;
+}
+.more {
+  display: none;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-right: 4px;
+}
+
+.toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.toolbar label.melody {
+  color: var(--melody);
+}
+.toolbar label.chords {
+  color: var(--chords);
+}
+.toolbar select {
+  max-width: 100%;
+}
+#song {
+  max-width: 18em;
+}
+
+select,
+button,
+.download {
+  font: inherit;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 8px;
+}
+button,
+.download {
+  cursor: pointer;
+  text-decoration: none;
+}
+button:hover,
+.download:hover,
+select:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+  background: rgba(255, 255, 255, 0.06);
+}
+select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+select:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--melody);
+  outline-offset: 1px;
+}
+
+input[type="range"] {
+  width: 90px;
+  accent-color: var(--melody);
+}
+output {
+  min-width: 2.5ch;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+#record.on {
+  background: var(--record);
+  border-color: var(--record);
+  color: #fff;
+}
+.download {
+  border-color: var(--melody);
+  color: var(--melody);
+}
+
+.intro {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 16px;
+  z-index: 3;
+  background: radial-gradient(ellipse at top, #1b2030 0%, var(--bg) 70%);
+}
+.intro[hidden] {
+  display: none;
+}
+
+.card {
+  max-width: 520px;
+  width: 100%;
+  margin: auto; /* centers, but never pushes the top out of reach when the card is taller than the screen */
+  padding: 32px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.card h1 {
+  margin: 0 0 4px;
+  font-size: 32px;
+}
+.lede {
+  margin: 0 0 20px;
+  color: var(--muted);
+}
+.how {
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.how b {
+  color: var(--text);
+}
+.how b.melody {
+  color: var(--melody);
+}
+.how b.chords {
+  color: var(--chords);
+}
+
+.start {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #061412;
+  background: var(--melody);
+  border: none;
+  border-radius: 12px;
+}
+.start:hover {
+  background: #66ebde;
+}
+.start:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.status {
+  min-height: 1.4em;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.status.error {
+  color: var(--record);
+}
+
+.keys {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+}
+
+/* ---------- Song panel ---------- */
+
+.song {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* lets long titles ellipsize instead of widening the panel */
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  font-size: 13px;
+}
+.song[hidden] {
+  display: none;
+}
+.song p {
+  margin: 0;
+}
+
+.song-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.song-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+.song-title b {
+  color: var(--text);
+}
+.song-section {
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.song-section:empty {
+  display: none;
+}
+.song-head button {
+  padding: 3px 9px;
+  font-size: 12px;
+}
+
+/* One line, always: the panel keeps the same height from chord to chord, so the rows below it never shift. */
+.song-main {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+.song-now {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 14px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.song-finger {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--chords);
+  border-radius: 12px;
+  color: var(--chords);
+  font-size: 26px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.song-finger[hidden] {
+  display: none;
+}
+.song-chord {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--chords);
+}
+.song-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+.song-emoji {
+  margin-left: 6px;
+  font-size: 20px;
+}
+
+/* An air guitar chord sign: five bars, thumb to pinky, raised fingers tall. */
+.glyph {
+  display: block;
+  width: 26px;
+  height: 22px;
+  fill: currentColor;
+}
+.glyph .down {
+  opacity: 0.3;
+}
+/* right chord held: glow in the chord color */
+.song-now[data-state="correct"] {
+  border-color: var(--chords);
+  background: color-mix(in srgb, var(--chords) 14%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--chords) 45%, transparent);
+}
+.song-now[data-state="correct"] .song-finger {
+  background: var(--chords);
+  color: var(--bg);
+}
+/* right sign, not strummed yet (air mode) */
+.song-now[data-state="ready"] {
+  border-color: color-mix(in srgb, var(--chords) 60%, transparent);
+}
+/* wrong chord: nudge toward the finger count */
+.song-now[data-state="wrong"] {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-style: dashed;
+}
+.song-now[data-state="wrong"] .song-finger {
+  animation: nudge 1s ease-in-out infinite;
+}
+@keyframes nudge {
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--chords) 25%, transparent);
+  }
+}
+
+.song-next {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.song-next li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--chords) 35%, transparent);
+  border-radius: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.song-next li b {
+  color: var(--chords);
+}
+.song-next .glyph {
+  align-self: center;
+  width: 13px;
+  height: 11px;
+  color: var(--chords);
+}
+.song-next li:nth-child(n + 3) {
+  opacity: 0.6;
+}
+
+.song-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.song-bar > div {
+  height: 100%;
+  background: var(--chords);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.song-words {
+  display: grid;
+  gap: 2px;
+}
+.song-words p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.song-lyric {
+  min-height: 1.3em;
+  font-size: 17px;
+  font-weight: 600;
+}
+.song-lyric-next {
+  min-height: 1.3em;
+  color: var(--muted);
+  opacity: 0.75;
+}
+.song-note {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.song.done .song-bar,
+.song.done .song-next,
+.song.done .song-words,
+.song.blocked .song-bar,
+.song.blocked .song-words {
+  visibility: hidden; /* not display: none, so the panel height stays put */
+}
+/* a song air mode can't play: let the explanation wrap */
+.song.blocked .song-now {
+  flex-shrink: 1;
+}
+.song.done .song-chord {
+  font-size: 22px;
+}
+.song.done .song-restart {
+  background: var(--chords);
+  border-color: var(--chords);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .song-now,
+  .song-now[data-state="wrong"] .song-finger {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ---------- Phones (and landscape phones: short screens get the same compact toolbar) ---------- */
+
+@media (max-width: 600px), (max-height: 480px) {
+  .toolbar {
+    gap: 8px 12px;
+    padding: 8px 10px;
+  }
+  .toolbar-more {
+    display: none;
+  }
+  .toolbar.expanded .toolbar-more {
+    order: 1;
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .more {
+    display: inline-block;
+  }
+  #song {
+    max-width: 12em;
+  }
+
+  .song-finger {
+    width: 38px;
+    height: 38px;
+    font-size: 22px;
+  }
+  .song-chord {
+    font-size: 22px;
+  }
+  .song-next li:nth-child(n + 4) {
+    display: none;
+  }
+
+  .card {
+    padding: 22px;
+  }
+  .how {
+    gap: 10px;
+  }
+}
+
+/* Short screens (landscape phones): a compact song panel, so the strings and the sign chart stay below it. */
+@media (max-height: 480px) {
+  .song {
+    gap: 4px;
+    padding: 6px 10px;
+  }
+  .song-next,
+  .song-lyric-next {
+    display: none;
+  }
+  .song-now {
+    gap: 8px;
+    padding: 2px 10px 2px 2px;
+  }
+  .song-finger {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+  .song-chord {
+    font-size: 18px;
+  }
+  .song-emoji {
+    font-size: 16px;
+  }
+  .song-lyric {
+    font-size: 14px;
+  }
+}
